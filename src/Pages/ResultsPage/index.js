@@ -1,13 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./style.css";
 import { useNavigate } from "react-router-dom";
-
+import questions from "../../Data/questions";
 
 function ResultsPage() {
+  const [score, setScore] = useState(0);
 
-const calculateScore = () => {
-  
-}
+  // Grabs score state out of local storage //
+  // Have to make it so local storage does not refresh if you refresh during quiz // 
+  useEffect(() => {
+    const score = JSON.parse(localStorage.getItem("score"));
+    if (score) {
+      setScore(score);
+    }
+  }, []);
+
+  let convertedFinalScore = Math.trunc((score / questions.length) * 100);
 
   let navigate = useNavigate();
 
@@ -15,10 +23,9 @@ const calculateScore = () => {
     <div>
       <h1>Your results</h1>
       <div className="score-box">
-        <div>You scored a %</div>
+        <div>You scored a {convertedFinalScore}%</div>
       </div>
-      {/* Dynamically display your score  */}
-      
+
       <button
         onClick={() => {
           navigate("/");

@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./style.css";
 import questions from "../../Data/questions";
 import { useNavigate } from "react-router-dom";
+import CountDownTimer from "../CountDownTimer";
 
 function AssessmentQuestion() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showSeeResults, setShowSeeResults] = useState(false);
   const [score, setScore] = useState(0);
-
   let navigate = useNavigate();
+
+  // Timer //
+  const hoursMinSecs = { seconds: 30 };
+  // Timer End //
 
   const handleAnswerButtonClick = (isCorrect) => {
     if (isCorrect === true) {
@@ -21,6 +25,11 @@ function AssessmentQuestion() {
       setShowSeeResults(true);
     }
   };
+
+  // Sets score state in local storage //
+  useEffect(() => {
+    window.localStorage.setItem("score", score);
+  }, [score]);
 
   return (
     <div>
@@ -37,6 +46,7 @@ function AssessmentQuestion() {
         </div>
       ) : (
         <div>
+          <CountDownTimer hoursMinSecs={hoursMinSecs} />
           <div>
             {score} out of {questions.length}
           </div>
@@ -49,9 +59,9 @@ function AssessmentQuestion() {
             {questions[currentQuestion].answerOptions.map((answerOption) => (
               <div>
                 <button
-                  onClick={() =>
-                    handleAnswerButtonClick(answerOption.isCorrect)
-                  }
+                  onClick={() => {
+                    handleAnswerButtonClick(answerOption.isCorrect);
+                  }}
                   className="answer-button"
                 >
                   {answerOption.answerText}
