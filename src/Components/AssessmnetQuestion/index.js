@@ -2,7 +2,18 @@ import React, { useState, useEffect } from "react";
 import "./style.css";
 import questions from "../../Data/questions";
 import { useNavigate } from "react-router-dom";
-import CountDownTimer from "../CountDownTimer";
+
+  ///////////////////////////////////////////////////////
+
+  // To do:
+
+  // Show last five scores at home page
+
+  // Set score if player tries to refresh page and cheat 
+
+  // custom alert if player wants to end quiz and return to the home screen
+
+  ///////////////////////////////////////////////////////
 
 function AssessmentQuestion() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -10,9 +21,44 @@ function AssessmentQuestion() {
   const [score, setScore] = useState(0);
   let navigate = useNavigate();
 
+  ///////////////////////////////////////////////////////
+
   // Timer //
-  const hoursMinSecs = { seconds: 30 };
-  // Timer End //
+  const hoursMinSecs = { seconds: 5 };
+  const { hours = 0, minutes = 0, seconds = 60 } = hoursMinSecs;
+  const [[hrs, mins, secs], setTime] = useState([hours, minutes, seconds]);
+
+  const tick = () => {
+    const nextQuestion = currentQuestion + 1;
+    const timesUp = hrs === 0 && mins === 0 && secs === 0;
+    const endOfQuestions = nextQuestion >= questions.length;
+
+    if (timesUp) {
+      reset();
+      setCurrentQuestion(nextQuestion);
+      if (timesUp && endOfQuestions) {
+        setShowSeeResults(true);
+      }
+    } else if (mins === 0 && secs === 0) {
+      setTime([hrs - 1, 59, 59]);
+    } else if (secs === 0) {
+      setTime([hrs, mins - 1, 59]);
+    } else {
+      setTime([hrs, mins, secs - 1]);
+    }
+  };
+
+  const reset = () =>
+    setTime([parseInt(hours), parseInt(minutes), parseInt(seconds)]);
+
+  useEffect(() => {
+    const timerId = setInterval(() => tick(), 1000);
+    return () => clearInterval(timerId);
+  });
+ 
+  ///////////////////////////////////////////////////////
+
+  // Quiz functionality // 
 
   const handleAnswerButtonClick = (isCorrect) => {
     if (isCorrect === true) {
@@ -26,10 +72,27 @@ function AssessmentQuestion() {
     }
   };
 
-  // Sets score state in local storage //
+  const onClickReset = () => {
+    reset();
+  };
+
   useEffect(() => {
     window.localStorage.setItem("score", score);
   }, [score]);
+
+  ///////////////////////////////////////////////////////
+
+  // Window refresh alert //
+  useEffect(() => {
+    window.onbeforeunload = function () {
+      return true;
+    };
+    return () => {
+      window.onbeforeunload = null;
+    };
+  }, []);
+
+  ///////////////////////////////////////////////////////
 
   return (
     <div>
@@ -46,7 +109,9 @@ function AssessmentQuestion() {
         </div>
       ) : (
         <div>
-          <CountDownTimer hoursMinSecs={hoursMinSecs} />
+          <div>
+            <div>{`${secs.toString().padStart(2)}`}</div>
+          </div>
           <div>
             {score} out of {questions.length}
           </div>
@@ -61,6 +126,7 @@ function AssessmentQuestion() {
                 <button
                   onClick={() => {
                     handleAnswerButtonClick(answerOption.isCorrect);
+                    onClickReset();
                   }}
                   className="answer-button"
                 >
@@ -70,7 +136,6 @@ function AssessmentQuestion() {
             ))}
           </div>
           <button
-            //Create alert to let them know they will loose score //
             onClick={() => {
               navigate("/");
             }}
