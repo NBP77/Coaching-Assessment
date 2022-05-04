@@ -4,10 +4,19 @@ import { useNavigate } from "react-router-dom";
 import questions from "../../Data/questions";
 
 function ResultsPage() {
+  const [ setCurrentQuestion ] = useState(0);
   const [score, setScore] = useState(0);
+  
+
+  const replayGame = () => {
+    window.location.reload();
+    setCurrentQuestion(0);
+    setScore(0);
+  };
+  
 
   // Grabs score state out of local storage //
-  // Have to make it so local storage does not refresh if you refresh during quiz // 
+  // Have to make it so local storage does not refresh if you refresh during quiz //
   useEffect(() => {
     const score = JSON.parse(localStorage.getItem("score"));
     if (score) {
@@ -29,6 +38,7 @@ function ResultsPage() {
       <button
         onClick={() => {
           navigate("/");
+          replayGame();
         }}
       >
         Try again?

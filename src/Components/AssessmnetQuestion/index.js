@@ -3,17 +3,13 @@ import "./style.css";
 import questions from "../../Data/questions";
 import { useNavigate } from "react-router-dom";
 
-  ///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 
-  // To do:
+// To do:
 
-  // Show last five scores at home page
+// Randomize questions
 
-  // Set score if player tries to refresh page and cheat 
-
-  // custom alert if player wants to end quiz and return to the home screen
-
-  ///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 
 function AssessmentQuestion() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -24,7 +20,7 @@ function AssessmentQuestion() {
   ///////////////////////////////////////////////////////
 
   // Timer //
-  const hoursMinSecs = { seconds: 5 };
+  const hoursMinSecs = { seconds: 60 };
   const { hours = 0, minutes = 0, seconds = 60 } = hoursMinSecs;
   const [[hrs, mins, secs], setTime] = useState([hours, minutes, seconds]);
 
@@ -55,10 +51,10 @@ function AssessmentQuestion() {
     const timerId = setInterval(() => tick(), 1000);
     return () => clearInterval(timerId);
   });
- 
+
   ///////////////////////////////////////////////////////
 
-  // Quiz functionality // 
+  // Quiz functionality //
 
   const handleAnswerButtonClick = (isCorrect) => {
     if (isCorrect === true) {
@@ -76,6 +72,13 @@ function AssessmentQuestion() {
     reset();
   };
 
+const endingAssessment = () => {
+  localStorage.clear();
+  alert('Your score will be reset');
+}
+
+  // Local Storage //
+
   useEffect(() => {
     window.localStorage.setItem("score", score);
   }, [score]);
@@ -83,6 +86,7 @@ function AssessmentQuestion() {
   ///////////////////////////////////////////////////////
 
   // Window refresh alert //
+  
   useEffect(() => {
     window.onbeforeunload = function () {
       return true;
@@ -109,13 +113,16 @@ function AssessmentQuestion() {
         </div>
       ) : (
         <div>
-          <div>
-            <div>{`${secs.toString().padStart(2)}`}</div>
+          <div className="timer-box">
+            <div className="timer">{`${secs.toString().padStart(2)}`}</div>
           </div>
-          <div>
-            {score} out of {questions.length}
+          <div className="score">
+            {score} out of {questions.length} correct 
           </div>
-          <div className="question-section">
+          <div className="question-number">
+            Question {currentQuestion + 1}/10
+          </div>
+          <div className="question-container">
             <div className="question-text">
               {questions[currentQuestion].questionText}
             </div>
@@ -123,7 +130,7 @@ function AssessmentQuestion() {
           <div className="answer-section">
             {questions[currentQuestion].answerOptions.map((answerOption) => (
               <div>
-                <button
+                <div
                   onClick={() => {
                     handleAnswerButtonClick(answerOption.isCorrect);
                     onClickReset();
@@ -131,13 +138,15 @@ function AssessmentQuestion() {
                   className="answer-button"
                 >
                   {answerOption.answerText}
-                </button>
+                </div>
               </div>
             ))}
           </div>
           <button
             onClick={() => {
               navigate("/");
+              endingAssessment();
+              
             }}
           >
             To stop assessment click here
